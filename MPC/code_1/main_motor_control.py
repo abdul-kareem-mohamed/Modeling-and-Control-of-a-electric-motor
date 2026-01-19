@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import support_files_motor_lecture as sfm
+import support_files_motor as sfm
 
 # Create an object for the support functions
 support=sfm.SupportFilesMotor()
@@ -150,3 +150,4 @@ plt.show()
 
 
     
+
