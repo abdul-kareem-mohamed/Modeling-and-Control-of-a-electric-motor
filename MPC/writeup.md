@@ -111,52 +111,27 @@ $$B_d = \left( \int_{0}^{T_s} e^{A\tau} d\tau \right) B$$
 Since the output equation is algebraic, it remains unchanged:
 $$C_d = C$$
 
-## 🔄 Augmented State-Space Model (Velocity Form)
+## 🔄 Augmented State-Space Model
 
-To improve tracking performance and allow the controller to penalize the *rate of change* of the input (rather than just the absolute value), we reformulate the system into the **Velocity Form**.
+To improve tracking performance and allow the controller to penalize the *rate of change* of the input (rather than just the absolute value), so that we can have a smooth transition to the desired state, we optimize the *rate of change* of the input.  
 
-In this formulation, the manipulated variable becomes the input increment:
-$$\Delta u_k = u_k - u_{k-1}$$
+There is a fundamental mismatch between what the optimizer calculates and what the vehicle needs:  
+* Optimizer Output: The MPC finds the sequence of optimal changes: $\Delta V_{i}$.
+* Plant Input: The motor physics require the absolute input voltage: $V_{i}$.
 
-This requires augmenting the state vector to include the state increments ($\Delta x_k$) and the current output ($y_k$).
+  To bridge this, we use the recursive relationship:
 
-**1. Difference Equation**
-Subtracting the state equation at time $k-1$ from time $k$:
-$$x_{k+1} - x_k = A_d(x_k - x_{k-1}) + B_d(u_k - u_{k-1})$$
-$$\Delta x_{k+1} = A_d \Delta x_k + B_d \Delta u_k$$
+  $$V_i = V_{i, k-1} + \Delta V_i$$
+  
+  This means that to find the current input voltage, the controller must "remember" what the input voltage was at the previous time step ($k-1$).
 
-**2. Augmented State Vector**
-We define a new state vector $\mathbf{x}_{aug}$ that stacks the change in state with the output:
-$$
-\mathbf{x}_{aug, k} = \begin{bmatrix} \Delta \mathbf{x}_k \\ y_k \end{bmatrix} = \begin{bmatrix} \Delta \omega_k \\ \Delta I_k \\ y_k \end{bmatrix}
-$$
+Because the "previous input voltage" is now required to predict future states, it can no longer be treated as a simple constant; it must become a state variable.  
+We augment the state vector $\mathbf{x}$ by adding $\delta$ as the 3rd element:  
 
-**3. Augmented Matrices**
-The output equation evolves as $y_{k+1} = y_k + C_d \Delta x_{k+1}$. Combining this with the difference equation yields the augmented system matrices:
+$$\mathbf{x}_{aug} = \begin{bmatrix} w \\ I \\ \V_{i, k-1} \end{bmatrix}$$  
+
+Thus, the augmented system matrix, input matrix, and output matrix are as follows:  
 
 $$
-\mathbf{x}_{aug, k+1} = 
-\underbrace{
-\begin{bmatrix} 
-A_d & \mathbf{0}^T \\ 
-C_d A_d & 1 
-\end{bmatrix}}_{A_{aug}} 
-\cdot \mathbf{x}_{aug, k} 
-+ 
-\underbrace{
-\begin{bmatrix} 
-B_d \\ 
-C_d B_d 
-\end{bmatrix}}_{B_{aug}} 
-\cdot \Delta u_k
+\underbrace{\begin{bmatrix}\vec{x}_{k+1} \\ V_{in, k}\end{bmatrix}}_{\tilde{X}_{k+1}} = \underbrace{\begin{bmatrix} A & B \\ \mathbf{0} & I \end{bmatrix}}_{\tilde{A}} \underbrace{\begin{bmatrix}\vec{x}_k \\ V_{in, k-1}\end{bmatrix}}_{\tilde{X}_k} + \underbrace{\begin{bmatrix}B \\ 1\end{bmatrix}}_{\tilde{B}} \Delta V_{in}
 $$
-
-$$
-y_k = \underbrace{\begin{bmatrix} \mathbf{0} & 1 \end{bmatrix}}_{C_{aug}} \cdot \mathbf{x}_{aug, k}
-$$
-
-**Why use this formulation?**
-* **Integral Action:** By including $y_k$ in the state, the controller "remembers" the current output level, ensuring offset-free tracking of the reference.
-* **Slew Rate Control:** Since the input is $\Delta u_k$, we can directly penalize aggressive changes in voltage, protecting the motor from voltage spikes.
-
----
