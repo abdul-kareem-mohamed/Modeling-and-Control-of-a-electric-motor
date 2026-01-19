@@ -20,8 +20,6 @@ class SupportFilesMotor:
         time_length = 10 # [s] - duration of the entire manoeuvre
         Nu=2 #control horizon
 
-        Q=np.matrix('1') # weights for outputs (all samples, except the last one) -  1 outputs, so 1x1 identity
-        S=np.matrix('10') # weights for the final horizon period outputs
         R_weight=0.1 # weights for inputs (only 1 input in our case)
 
         hz=10 #horizon period
@@ -86,9 +84,6 @@ class SupportFilesMotor:
     
     def mpc_simplification(self, Ad, Bd, Cdt, Dd, hz):
         '''This function creates the compact matrices for Model Predictive Control'''
-        # db - double bar
-        # dbt - double bar transpose
-        # dc - double circumflex
 
         A_aug=np.concatenate((Ad,Bd),axis=1)
         temp1=np.zeros((np.size(Bd,1),np.size(Ad,1)))
@@ -158,19 +153,3 @@ class SupportFilesMotor:
 
         return new_states
 
-
-# support=SupportFilesMotor()
-# Ad, Bd, Cdt, Dd = support.state_space()
-# H, F = support.mpc_simplification(Ad, Bd, Cdt, Dd, 3)
-# print("H: ")
-# print(H)
-# print("\n")
-# print("F: ")
-# print(F)
-# print("\n")
-# print("Cdt: ")
-# print(Cdt)
-# print("\n")
-# print("Dd: ")
-# print(Dd)
-# print("\n")
