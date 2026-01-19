@@ -110,7 +110,7 @@ for i in range(0,sim_length-1):
     y_aug_opt=np.matmul(F,x_aug_t)+np.matmul(H_tilde,du)
     v_opt_total[i+1][0:hz] = np.transpose(y_aug_opt)
 
-    # Compute new states in the open loop system (interval: Ts/30)
+    # Compute new states in the open loop system
     states=support.open_loop_new_states(states,Vin)
     statesTotal[i+1][0:len(states)]=states
 
@@ -141,6 +141,7 @@ plt.grid(True)
 
 plt.tight_layout()
 plt.show()
+
 
 
 
