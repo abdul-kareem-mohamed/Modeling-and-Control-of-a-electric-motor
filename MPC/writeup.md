@@ -128,7 +128,7 @@ There is a fundamental mismatch between what the optimizer calculates and what t
 Because the "previous input voltage" is now required to predict future states, it can no longer be treated as a simple constant; it must become a state variable.  
 We augment the state vector $\mathbf{x}$ by adding $\delta$ as the 3rd element:  
 
-$$\mathbf{x}_{aug} = \begin{bmatrix} w \\ I \\ \V_{i, k-1} \end{bmatrix}$$  
+$$\mathbf{x}_{aug} = \begin{bmatrix} w \\ I \\ V_{i, k-1} \end{bmatrix}$$  
 
 Thus, the augmented system matrix, and input matrix are as follows:  
 
@@ -233,3 +233,5 @@ $$
 **Why is this important?**
 * **Efficiency:** Because the solution is analytical (just matrix multiplication), it is computationally very fast and suitable for real-time implementation on embedded microcontrollers.
 * **Role of $\lambda$:** The term $\lambda \underline{I}$ ensures the matrix is invertible and allows us to tune how "aggressive" the controller is. A higher $\lambda$ results in smoother, slower control.
+
+The $$\Delta \underline{u}^+$$ can then be added with the previous input to calculate the new input. The new input can then be used in the plant to control the speed parameter. This loop continues for the complete time duration. 
