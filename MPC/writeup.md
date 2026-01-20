@@ -130,8 +130,106 @@ We augment the state vector $\mathbf{x}$ by adding $\delta$ as the 3rd element:
 
 $$\mathbf{x}_{aug} = \begin{bmatrix} w \\ I \\ \V_{i, k-1} \end{bmatrix}$$  
 
-Thus, the augmented system matrix, input matrix, and output matrix are as follows:  
+Thus, the augmented system matrix, and input matrix are as follows:  
 
 $$
 \underbrace{\begin{bmatrix}\vec{x}_{k+1} \\ V_{in, k}\end{bmatrix}}_{\tilde{X}_{k+1}} = \underbrace{\begin{bmatrix} A & B \\ \mathbf{0} & I \end{bmatrix}}_{\tilde{A}} \underbrace{\begin{bmatrix}\vec{x}_k \\ V_{in, k-1}\end{bmatrix}}_{\tilde{X}_k} + \underbrace{\begin{bmatrix}B \\ 1\end{bmatrix}}_{\tilde{B}} \Delta V_{in}
 $$
+
+and the output matrix is as follows:  
+
+$$
+y = \underbrace{\begin{bmatrix} r & 0 \end{bmatrix}}_{\underline{c}^T} \cdot \begin{bmatrix} x_1 \\ x_2 \end{bmatrix}
+$$  
+
+* The new system description is:
+
+$$
+\underline{\tilde{x}}(k+1) = \underline{\tilde{A}} \ \underline{\tilde{x}}(k) + \underline{\tilde{b}} \Delta u(k)
+$$
+
+$$
+y(k) = \underline{\tilde{c}}^T \ \underline{\tilde{x}}(k)
+$$
+
+## 🔮 MPC Prediction Model
+
+Using the augmented state-space model, the controller predicts the future output values $\hat{y}$ over a prediction horizon $N_p$. This prediction is performed recursively, assuming the control horizon $N_u$ equals the prediction horizon ($N_p = N_u$).
+
+**1. Recursive Prediction Vectors**
+By iterating the state equation forward, we express the vector of predicted outputs $\underline{\hat{y}}$ as a function of the current state $\underline{\tilde{x}}(k)$ and the sequence of future control increments $\Delta \underline{u}$:
+
+$$
+\underline{\hat{y}} = 
+\begin{bmatrix} 
+\hat{y}(k+1) \\ 
+\hat{y}(k+2) \\ 
+\vdots \\ 
+\hat{y}(k+N_p) 
+\end{bmatrix}
+$$
+
+**2. Matrix Formulation**
+The recursive equations are stacked into a compact matrix form. This separates the prediction into two parts: the **Free Response** (effect of current state) and the **Forced Response** (effect of future control inputs):
+
+$$
+\underline{\hat{y}} = \underline{F} \underline{\tilde{x}}(k) + \underline{H} \Delta \underline{u}^+
+$$
+
+Where the matrices are defined as:
+
+* **Prediction Matrix ($F$):** Propagates the current state forward.
+
+$$
+\underline{F} = 
+\begin{bmatrix} 
+\tilde{c}^T \tilde{A} \\ 
+\tilde{c}^T \tilde{A}^2 \\ 
+\vdots \\ 
+\tilde{c}^T \tilde{A}^{N_p} 
+\end{bmatrix}
+$$
+  
+* **Control Matrix ($H$):** A Toeplitz-like matrix representing the system's impulse response to future inputs.
+  
+$$
+\underline{H} = 
+\begin{bmatrix} 
+\tilde{c}^T \tilde{b} & 0 & \cdots & 0 \\ 
+\tilde{c}^T \tilde{A} \tilde{b} & \tilde{c}^T \tilde{b} & \cdots & 0 \\ 
+\vdots & \vdots & \ddots & \vdots \\ 
+\tilde{c}^T \tilde{A}^{N_p-1} \tilde{b} & \tilde{c}^T \tilde{A}^{N_p-2} \tilde{b} & \cdots & \tilde{c}^T \tilde{b} 
+\end{bmatrix}
+$$
+  
+**Significance:**
+This formulation allows the MPC optimization problem to be solved as a standard Quadratic Programming (QP) problem, minimizing the error between $\underline{\hat{y}}$ and the reference trajectory.  
+
+## 🎯 Optimization & Control Law
+
+To determine the optimal control inputs, we define a quadratic cost function $J$. This function penalizes the deviation of the predicted output $\hat{y}$ from the reference trajectory $w$, as well as the magnitude of the control updates $\Delta u$ (to ensure smooth operation).
+
+**1. Cost Function**
+The optimization problem is formulated as a sum of squared errors over the prediction horizon:
+
+$$
+J = \min_{\Delta u} \left( \sum_{i=1}^{N_p} (w_{k+i} - \hat{y}_{k+i})^2 + \lambda \sum_{i=1}^{N_u} \Delta u_{k+i}^2 \right)
+$$
+
+Where:
+* $w$: Reference trajectory (target speed).
+* $\hat{y}$: Predicted output from our state-space model.
+* $\lambda$: Tuning parameter (weight) for control effort.
+
+**2. Analytical Solution (Unconstrained)**
+By substituting the prediction model equation ($\underline{\hat{y}} = \underline{F} \underline{\tilde{x}}(k) + \underline{H} \Delta \underline{u}$) into the cost function, the problem reduces to a standard linear least-squares problem.
+
+Assuming no physical constraints (like voltage saturation), the optimal control sequence $\Delta \underline{u}^+$ can be calculated directly using a closed-form solution:
+
+$$
+\Delta \underline{u}^+ = \left( \underline{H}^T \underline{H} + \lambda \underline{I} \right)^{-1} \underline{H}^T (\underline{w} - \underline{F} \underline{\tilde{x}}(k))
+$$
+
+**Why is this important?**
+* **Efficiency:** Because the solution is analytical (just matrix multiplication), it is computationally very fast and suitable for real-time implementation on embedded microcontrollers.
+* **Role of $\lambda$:** The term $\lambda \underline{I}$ ensures the matrix is invertible and allows us to tune how "aggressive" the controller is. A higher $\lambda$ results in smoother, slower control.
