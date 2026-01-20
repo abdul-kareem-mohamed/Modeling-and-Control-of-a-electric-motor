@@ -1,5 +1,5 @@
 # Modeling-and-Control-of-a-electric-motor
-This repository houses the speed control of a electric motor using state-space control and MPC control.  
+This repository houses the speed control of a electric motor using state-space control and MPC control.This repository implements State-Space and Model Predictive Control (MPC) strategies for precise speed regulation of a DC motor.  
 
 ## Model Predictive Control  
 
