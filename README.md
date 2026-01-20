@@ -32,6 +32,8 @@ Figure 5: Input Velocity vs Time plot after increasing the actuation penalty to 
 
 When the control action parameter got penalised, the aggressive behaviour of input voltage has drastically reduced but this has introduced some oscillation in the speed control.  
 
+[Project writeup](https://github.com/abdul-kareem-mohamed/Modeling-and-Control-of-a-electric-motor/blob/main/MPC/writeup.md)  
+[Source](https://github.com/abdul-kareem-mohamed/Modeling-and-Control-of-a-electric-motor/tree/main/MPC/code_1)
 
 
 
