@@ -35,6 +35,10 @@ When the control action parameter got penalised, the aggressive behaviour of inp
 [Project writeup](https://github.com/abdul-kareem-mohamed/Modeling-and-Control-of-a-electric-motor/blob/main/MPC/writeup.md)  
 [Source](https://github.com/abdul-kareem-mohamed/Modeling-and-Control-of-a-electric-motor/tree/main/MPC/code_1)
 
+## State space Controller  
+
+1. Pole placement
+   
 
 
 
