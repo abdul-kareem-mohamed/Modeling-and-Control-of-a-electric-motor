@@ -109,7 +109,78 @@ Where:
 Expanded, the feedback term looks like this:  $$\underline{k}^T \underline{x}(t) = k_1 x_1(t) + k_2 x_2(t) + \dots + k_n x_n(t)$$
 
 <img width="857" height="380" alt="image" src="https://github.com/user-attachments/assets/2b9e0663-3628-485f-be3e-509c1c9afe14" />  
+
 Figure 3: closed-loop of the system  
 
+The state-space controller therefore acts proportionally with the factors kion the states. Is it therefore also a P-controller? It is a $PD_{n-1}$ controller. However, with a decisive difference to the standard controller: The derivatives are not obtained by differentiation of the output signal. Instead, the states are measured which already correspond to these differentiated quantities! So, there is no amplification of noise here!  
 
+For the design of a state-space controller, i.e., the systematic determination of the values for $k_{i}$, there are two main methods:  
+
+* *Pole placement*: There are n control parameters available (k1, k2, ..., kn), with which it is possible to shift the n poles of the characteristic polynomial to desired positions.
+* *Optimization*: Minimizing a quadratic loss function leads to a globally optimal, simple, easily computable solution for the state-space controller (in contrast to the standard controller).
+
+Our goal is now to derive an equation for determining the controller parameters. To do this, we need to find the relationship between the controller parameters and the characteristic equation. The equations of state with controller are as follows:  
+
+**The Closed-Loop System Equation**  
+
+We start with the standard state-space equations for the open-loop system:  
+
+$$\underline{\dot{x}} = \underline{A}\underline{x} + \underline{b}u$$$$y = \underline{c}^T\underline{x}$$  
+
+Substituting the control law $u = w - \underline{k}^T\underline{x}$ into the state equation yields the closed-loop dynamics:  
+
+$$\underline{\dot{x}} = \underline{A}\underline{x} + \underline{b}(w - \underline{k}^T\underline{x})$$  
+
+Rearranging terms to group the state vector $\underline{x}$:  
+
+$$\underline{\dot{x}} = (\underline{A} - \underline{b}\underline{k}^T)\underline{x} + \underline{b}w$$  
+
+This new equation represents the closed-loop system where:  
+
+* $(\underline{A} - \underline{b}\underline{k}^T)$: This is the new effective system matrix. The state feedback has fundamentally altered the system dynamics.  
+
+* $w$: The reference variable now acts as the external input replacing the direct manipulated variable $u$.
+
+
+### Calculating Controller Parameters via Characteristic Equations  
+
+**1. Defining the Desired Behavior**  
+
+The fundamental goal of pole placement is to force the closed-loop system to behave according to a set of specified dynamics. This is achieved by selecting a set of $n$ desired poles, $\lambda_1, \lambda_2, \dots, \lambda_n$, where $n$ is the order of the system.  
+
+Mathematically, specifying these poles is equivalent to defining a desired characteristic polynomial, $N(s)$:  
+
+$$N(s) = (s - \lambda_1)(s - \lambda_2)\cdot \dots \cdot (s - \lambda_n)$$  
+
+When expanded, this yields a polynomial of the $n$-th degree with specific target coefficients $n_i$:  
+
+$$N(s) = s^n + n_{n-1}s^{n-1} + \dots + n_1s + n_0$$  
+
+**2. The Design Condition**  
+
+To implement this, we must ensure that the actual characteristic equation of our closed-loop system matches this desired polynomial.  
+
+Recall that the closed-loop system matrix is $(\underline{A} - \underline{b}\underline{k}^T)$. The characteristic equation is found by taking the determinant of $(s\underline{I} - \text{System Matrix})$. Therefore, the fundamental condition for pole placement is:  
+
+$$\det \left( s\underline{I} - (\underline{A} - \underline{b}\underline{k}^T) \right) = s^n + n_{n-1}s^{n-1} + \dots + n_1s + n_0$$  
+
+**3. Coefficient Comparison Method**  
+
+This equation provides the direct algebraic link between the unknown controller gains ($k_i$) and the desired performance ($n_i$).  
+
+* Calculate Determinant: Analytically compute the determinant on the left-hand side. This will result in a polynomial where the coefficients are functions of the unknown gains $k$.
+* Compare Coefficients: Match the coefficients of the powers of $s$ (e.g., $s^0, s^1, \dots$) from the calculated determinant with the coefficients $n_i$ from the desired polynomial.
+* Solve: This yields a system of linear equations that can be solved to find the specific values for the vector $\underline{k}^T$.
+
+**4. The Stability & Existence Condition (Controllability)**  
+
+A critical prerequisite exists for this method to work. The state-space controller can arbitrarily move all poles to any desired location if and only if the system $(\underline{A}, \underline{b})$ is completely controllable.  
+* Logic: If a system is non-controllable, the input $u$ has no physical influence on certain internal states (uncontrollable modes). Consequently, no feedback gain $k$ can alter the dynamics (eigenvalues) associated with those specific states.
+* Verification: Before attempting pole placement, always verify that the Controllability Matrix has full rank: $\text{rank}(\mathcal{C}) = n$.
+
+### Implementation  
+
+The state-space equations are transformed to controllable canonical form and then the $k_{c_i}$ parameters are calculated. Then, the calculated $k_{c_i}$ are back transformed to $k_{i}$ for the original system. The control parameters are then used to design the control loop.   
+
+A static prefilter is used to account the steady-state error.  
 
