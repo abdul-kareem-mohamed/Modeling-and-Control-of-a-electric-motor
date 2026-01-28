@@ -91,7 +91,7 @@ $$
 
 Before implementing the discrete MPC, we define the control objective using a continuous-time quadratic loss function $J$. This function mathematically defines what "optimal" performance means for the motor.
 
-**1. The General Cost Function**
+** The General Cost Function**
 The controller aims to minimize the accumulated error and control effort over a time interval $t_e$:
 
 $$
@@ -102,14 +102,3 @@ Where:
 * **$e(t)$**: Control deviation (Error = Target Speed - Actual Speed).
 * **$u(t)$**: Actuating effort (Voltage applied to the motor).
 * **$\alpha$**: Weighting factor (Penalizes high voltage usage).
-
-**2. The Regulation Problem**
-For a fixed command control (regulation problem), we assume the reference is $w=0$. The objective simplifies to driving the system output $y(t)$ (speed) to zero while minimizing input energy:
-
-$$
-J = \int_{0}^{t_e} [y^2(t) + \alpha u^2(t)] \, dt
-$$
-
-**3. The Finite Horizon Challenge**
-The integral runs up to a finite time $t_e$. If this time window is too short, the motor might not reach the target speed by the end of the horizon.
-> **Note:** To fix this, modern MPC implementations often add a **Terminal Cost** term. This penalizes the deviation at the exact final time $t_e$, ensuring the system converges even with short prediction horizons.
