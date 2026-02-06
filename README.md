@@ -39,6 +39,7 @@ When the control action parameter got penalised, the aggressive behaviour of inp
 
 1. Pole placement
    
+<img width="1862" height="924" alt="image" src="https://github.com/user-attachments/assets/bd715845-911a-47b8-bfd7-c4dd8dabe5f1" />
 
 
 
