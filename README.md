@@ -50,6 +50,8 @@ When the control action parameter got penalised, the aggressive behaviour of inp
 
 <img width="1854" height="921" alt="image" src="https://github.com/user-attachments/assets/b7bea23d-0ee6-46a7-9a72-3344ebf53a29" />
 
+[Project writeup](https://github.com/abdul-kareem-mohamed/Modeling-and-Control-of-a-electric-motor/tree/main/state_space_controller/lq_controller)  
+[Source](https://github.com/abdul-kareem-mohamed/Modeling-and-Control-of-a-electric-motor/blob/main/state_space_controller/lq_controller/writeup.md)  
 
 
 
