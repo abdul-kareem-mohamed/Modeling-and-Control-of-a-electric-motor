@@ -41,6 +41,10 @@ When the control action parameter got penalised, the aggressive behaviour of inp
    
 <img width="1862" height="924" alt="image" src="https://github.com/user-attachments/assets/bd715845-911a-47b8-bfd7-c4dd8dabe5f1" />  
 
+Figure 6: Performance of the control loop designed by pole placement  
+
+
+
 [Project writeup](https://github.com/abdul-kareem-mohamed/Modeling-and-Control-of-a-electric-motor/tree/main/state_space_controller/pole_placement)  
 [Source](https://github.com/abdul-kareem-mohamed/Modeling-and-Control-of-a-electric-motor/blob/main/state_space_controller/pole_placement/writeup.md)  
 
